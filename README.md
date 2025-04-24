@@ -1,4 +1,4 @@
-# 🤖 Smart-Vacuum-Robot-Simulation 
+# 🤖 Smart Vacuum Robot Simulation
 **Concurrent Perception & Mapping System – SPL225 @ BGU**
 
 A modular simulation of an autonomous vacuum robot’s perception and mapping system, developed as part of the **Systems Programming Course** at Ben-Gurion University.  
@@ -50,7 +50,7 @@ The system models real-time sensor fusion using **multithreaded Java Microservic
 - Real-time pose-aware mapping with coordinate transformation  
 - Supports multiple sensors with different frequencies  
 - Fault detection & emergency shutdown using broadcast messages  
-- Final JSON output with statistics and environment map  
+- Generates a final JSON output containing runtime statistics, detected landmarks, and crash report (if applicable)  
 
 ---
 
@@ -67,30 +67,32 @@ mvn test
 ```
 
 ### 3. Run Application
-To run the simulation, provide the path to a valid configuration JSON file as an argument:
+To run the simulation, provide the path to a valid configuration JSON file:
 ```bash
 mvn exec:java -Dexec.mainClass=bgu.spl.mics.application.GurionRockRunner -Dexec.args="/path/to/configuration_file.json"
 ```
 
-### 3. Output
-- Creates `output_file.json` in the same directory as the config:
-  - Runtime stats
-  - Final map (landmarks)
-  - Crash report (if applicable)
-
 ---
 
+## 📄 Output Description
+Generates an `output_file.json` in the same directory as the configuration file, containing:
+- Runtime statistics  
+- Final map (landmarks)  
+- Crash report (if applicable)
+
+---
 
 ## 🧪 Testing
 ```bash
 mvn test
 ```
-Includes unit tests for:
-- `MessageBusImpl`
-- `FusionSlam` (landmark transformation)
-- `CameraService` / `LiDarService` behavior
+Includes unit tests for core components:
+- `MessageBusImpl` – Publish/subscribe mechanisms and future resolution
+- `FusionSlam` – Landmark transformation and pose estimation
+- Sensor services (`CameraService`, `LiDarService`) – Message handling and event generation
 
 ---
+
 ## 📁 Directory Structure
 ```
 src/
@@ -104,6 +106,16 @@ src/
                         ├── objects/
                         └── services/
 ```
+
+---
+
+## 🔗 Example Configuration
+For testing the system, several input sets are provided under the following folders:
+- `example_input/`
+- `example_input_2/`
+- `example_input_with_error/`
+
+Each folder contains a `configuration_file.json` and supporting sensor data (`camera_data.json`, `lidar_data.json`, `pose_data.json`, etc.).
 
 ---
 
@@ -130,3 +142,6 @@ Student at BGU
 ## 📝 Important Note
 This project was designed and tested on a **Docker-compatible environment**.  
 Ensure file paths and JSON formats are valid when running in local or CI environments.
+
+> This project demonstrates real-time sensor integration using advanced concurrent programming techniques in Java.
+
