@@ -1,132 +1,126 @@
-# 🤖 Smart-Vacuum-Robot-Simulation  
-*Concurrent Perception & Mapping System – SPL @ BGU*
+# 🚨 Emergency Service Messaging System
 
-A modular simulation of an autonomous vacuum robot’s perception and mapping system, developed as part of the *Systems Programming Course* at Ben-Gurion University.  
-The system models real-time sensor fusion using *multithreaded Java Microservices* and a custom *MessageBus framework*.
-
----
+A cross-platform emergency event messaging system implemented as part of the *SPL - Systems Programming* course at Ben-Gurion University.  
+The system enables users to connect, subscribe to topics, send and receive messages, and manage state in real-time using the STOMP protocol.
 
 ## 🔧 Technologies Used
-•⁠  ⁠*Java 8* – Core implementation using threads, lambdas, and generics  
-•⁠  ⁠*Custom MessageBus* – Publish/subscribe, event routing & futures  
-•⁠  ⁠*Multithreading & Synchronization* – Thread-per-service model  
-•⁠  ⁠*GSON* – For JSON parsing of input sensor data  
-•⁠  ⁠*JUnit* – Test-driven development for core components  
-•⁠  ⁠*Maven* – Build automation and dependency resolution  
-•⁠  ⁠*Docker-compatible* – Tested in isolated environments  
 
----
-
+-	**Java** (Server side)
+-	**C++** (Client side, socket programming)
+-	STOMP Protocol over TCP
+-	JSON-based message structure
+-	Multithreading, Reactor Pattern
+-	Linux Sockets
+- Git for version control
+- Docker-compatible
+  
 ## 💡 Project Structure
 
-### ⁠ bgu.spl.mics.application ⁠
-•⁠  ⁠*⁠ messages/ ⁠*  
-  Contains all system messages (Events and Broadcasts) used in the pub/sub framework:
-  - ⁠ DetectObjectsEvent.java ⁠
-  - ⁠ TrackedObjectsEvent.java ⁠
-  - ⁠ PoseEvent.java ⁠
-  - ⁠ TickBroadcast.java ⁠
-  - ⁠ CrashedBroadcast.java ⁠, ⁠ TerminatedBroadcast.java ⁠
+- **Client (C++)**  
+  - Handles user input, message parsing, STOMP framing, connection lifecycle, and multithreaded I/O.
+  - Supported commands: `login`, `subscribe`, `send`, `report`, `logout`, `summary`.
 
-•⁠  ⁠*⁠ objects/ ⁠*  
-  Data representations of sensors, tracked objects, the robot pose, and statistics:
-  - ⁠ Camera.java ⁠, ⁠ LiDarWorkerTracker.java ⁠, ⁠ GPSIMU.java ⁠
-  - ⁠ DetectedObject.java ⁠, ⁠ TrackedObject.java ⁠, ⁠ LandMark.java ⁠
-  - ⁠ StampedCloudPoints.java ⁠, ⁠ StampedDetectedObjects.java ⁠
-  - ⁠ FusionSlam.java ⁠, ⁠ Pose.java ⁠, ⁠ CloudPoint.java ⁠, ⁠ StatisticalFolder.java ⁠
-  - ⁠ STATUS.java ⁠, ⁠ LiDarDataBase.java ⁠
-
-•⁠  ⁠*⁠ services/ ⁠*  
-  Microservice implementations:
-  - ⁠ CameraService.java ⁠
-  - ⁠ LiDarService.java ⁠
-  - ⁠ FusionSlamService.java ⁠
-
----
+- **Server (Java)**  
+  - Based on `bgu.spl.net.srv.Server`.
+  - Supports two threading models: **Thread Per Client (TPC)** and **Reactor** using Java NIO.
+  - Manages client sessions, topic subscriptions, and frame routing.
 
 ## ✨ Features
-•⁠  ⁠Fully event-driven concurrent design  
-•⁠  ⁠Global system timer using ⁠ TickBroadcast ⁠  
-•⁠  ⁠Real-time pose-aware mapping with coordinate transformation  
-•⁠  ⁠Supports multiple sensors with different frequencies  
-•⁠  ⁠Fault detection & emergency shutdown using broadcast messages  
-•⁠  ⁠Final JSON output with statistics and environment map  
 
----
+- Full support for the STOMP 1.2 protocol.
+- Real-time event broadcasting to subscribers.
+- Login & session tracking.
+- Multithreaded client handling (mutex-safe).
+- Graceful disconnection & logout.
+- Custom event summary generation.
 
-## 🚀 How to Run
 
-### 1. Build
-⁠ bash
+## How to Run
+
+### Server
+
+Navigate to the `server/` directory and run:
+
+```bash
 mvn clean compile
- ⁠
+mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.stomp.StompServer" -Dexec.args="7777 tpc"
+# or for reactor:
+mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.stomp.StompServer" -Dexec.args="7777 reactor"
+```
 
-### 2. Run Tests
-⁠ bash
-mvn test
- ⁠
+### Client
 
-### 3. Run Application
-To run the simulation, provide the path to a valid configuration JSON file as an argument:
-⁠ bash
-mvn exec:java -Dexec.mainClass=bgu.spl.mics.application.GurionRockRunner -Dexec.args="/path/to/configuration_file.json"
- ⁠
+From the `client/` directory:
 
-### 3. Output
-•⁠  ⁠Creates ⁠ output_file.json ⁠ in the same directory as the config:
-  - Runtime stats
-  - Final map (landmarks)
-  - Crash report (if applicable)
+```bash
+make
+cd bin
+./StompEMIClient
+```
 
----
+### Example Run
 
+Each client should be started in a separate terminal.
 
-## 🧪 Testing
-⁠ bash
-mvn test
- ⁠
-Includes unit tests for:
-•⁠  ⁠⁠ MessageBusImpl ⁠
-•⁠  ⁠⁠ FusionSlam ⁠ (landmark transformation)
-•⁠  ⁠⁠ CameraService ⁠ / ⁠ LiDarService ⁠ behavior
+#### Terminal 1 - Alice
 
----
-## 📁 Directory Structure
+```bash
+login 127.0.0.1:7777 Alice 123
+join police
+```
 
-src/
-└── main/
-    └── java/
-        └── bgu/
-            └── spl/
-                └── mics/
-                    └── application/
-                        ├── messages/
-                        ├── objects/
-                        └── services/
+#### Terminal 2 - Bob
 
+```bash
+login 127.0.0.1:7777 Bob abc
+join police
+report {PATH TO events1.json}
+```
 
----
+#### Terminal 1 - Alice again
 
-## 📚 Course Information
-•⁠  ⁠*Course:* SPL – Systems Programming Lab  
-•⁠  ⁠*Institution:* Ben-Gurion University of the Negev  
-•⁠  ⁠*Year:* 2025  
-•⁠  ⁠*Environment:* Linux CS Lab, Docker-compatible  
+```bash
+summary police Bob {PATH TO OUTPUT FILE (e.g. events1_out.txt)}
+logout
+```
 
----
+#### Terminal 2 - Bob
+
+```bash
+logout
+```
+
+## 🧪 Tests & Debugging
+
+- All features were manually tested with simulated users.
+- Memory safety ensured via `valgrind` and code reviews.
+- Server supports debugging printouts under verbose mode.
+
+## 🎓 Course Information
+
+- **Course**: SPL - Systems Programming
+- **Institution**: Ben-Gurion University of the Negev
+- **Year**: 2025
+- **Project Grade**: 100
+- **Environment:** Linux CS Lab, Docker-compatible  
+
+## How to Build
+
+1. Navigate to `client/` and compile the C++ client using `make`.
+2. Navigate to `server/` and run the Java server using your preferred build system (e.g., IntelliJ, Maven).
+3. Communication follows the STOMP protocol using TCP sockets.
+   
 
 ## 🧑‍💻 Authors
 
-*Ben Kapon*  
+**Ben Kapon**  
 Student at BGU  
 [LinkedIn](https://www.linkedin.com/in/ben-kapon1/)
 
-*Itay Shaul*  
+**Itay Shaul**  
 Student at BGU  
 [LinkedIn](https://www.linkedin.com/in/itay-shaul/)
 
----
+## Important note
+  **This project was designed and tested on a Docker-compatible environment.**
 
-## 📝 Important Note
-This project was designed and tested on a *Docker-compatible environment*.  
-Ensure file paths and JSON formats are valid when running in local or CI environments.
